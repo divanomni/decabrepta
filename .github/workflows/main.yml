@@ -33,11 +33,11 @@ jobs:
         run: |
           curl -s -X POST https://api.telegram.org/bot${{ secrets.AAF7DY4mhbymJbY98yb_y-9k-visgEmQnJI }}/sendMessage \
           -d text="Build succeeded! Node.js and Python images are pushed to GitHub Package Registry." \
-          -d chat_id=${{ secrets.1071859455 }}
+          -d chat_id=${{ 1071859455 }}
 
       - name: Notify failure in Telegram
         if: failure()
         run: |
           curl -s -X POST https://api.telegram.org/bot${{ secrets.AAF7DY4mhbymJbY98yb_y-9k-visgEmQnJI }}/sendMessage \
           -d text="Build failed! Check the GitHub Actions logs for details." \
-          -d chat_id=${{ secrets.1071859455 }}
+          -d chat_id=${{ 1071859455 }}
