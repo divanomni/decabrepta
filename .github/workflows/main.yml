@@ -1,4 +1,4 @@
-name: Notify on Image Push
+name: Build and Deploy
 
 on:
   push:
@@ -6,12 +6,38 @@ on:
       - main
 
 jobs:
-  notify:
+  build-and-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Notify on Telegram
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker
+        uses: actions/setup-node@v4
+
+      - name: Build and push Node.js Docker image
         run: |
-          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage -d "chat_id=${{ secrets.TELEGRAM_CHAT_ID }}" -d "text=Images have been successfully built and pushed to GitHub Package Registry."
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          docker build -t ghcr.io/username/node-app:latest -f Dockerfile.node .
+          echo ${{ secrets.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 }} | docker login ghcr.io -u ${{ secrets.divanomni }} --password-stdin
+          docker push ghcr.io/username/node-app:latest
+
+      - name: Build and push Python Docker image
+        run: |
+          docker build -t ghcr.io/username/python-app:latest -f Dockerfile.python .
+          echo ${{ secrets.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 }} | docker login ghcr.io -u ${{ secrets.divanomni }} --password-stdin
+          docker push ghcr.io/username/python-app:latest
+
+      - name: Notify success in Telegram
+        if: success()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.AAF7DY4mhbymJbY98yb_y-9k-visgEmQnJI }}/sendMessage \
+          -d text="Build succeeded! Node.js and Python images are pushed to GitHub Package Registry." \
+          -d chat_id=${{ secrets.1071859455 }}
+
+      - name: Notify failure in Telegram
+        if: failure()
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.AAF7DY4mhbymJbY98yb_y-9k-visgEmQnJI }}/sendMessage \
+          -d text="Build failed! Check the GitHub Actions logs for details." \
+          -d chat_id=${{ secrets.1071859455 }}
